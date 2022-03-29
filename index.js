@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
   res.send("Hello World !");
 });
 
+// Get address list
 app.get("/address", async (req, res) => {
   let address;
   try {
@@ -38,6 +39,37 @@ app.get("/address", async (req, res) => {
   res.json(address);
 });
 
+// Get student list
+app.get("/student", async (req, res) => {
+  let student;
+  try {
+    student = await Student.find().select("-__v");
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      message: "CANNOT find this student in the database",
+    });
+  }
+  res.json(student);
+});
+
+// Get student by id
+app.get("/student/:studentId", async (req, res) => {
+  let student;
+  try {
+    student = await Student.findById(req.params.studentId)
+      .select("-__v")
+      .populate("address");
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({
+      message: "CANNOT find this student in the database",
+    });
+  }
+  res.json(student);
+});
+
+// Create address
 app.post("/address", async (req, res) => {
   let address;
   try {
@@ -50,6 +82,21 @@ app.post("/address", async (req, res) => {
   res.status(201).json({
     message: `Address ${req.body.streetNumber} ${req.body.streetName} created`,
     address,
+  });
+});
+
+// Create student
+app.post("/student", async (req, res) => {
+  let student;
+  try {
+    student = await Student.create(req.body);
+  } catch (err) {
+    return res.status(401).json({
+      message: `ERROR: ${err}`,
+    });
+  }
+  res.status(201).json({
+    message: `Student ${req.body.firstName} ${req.body.surname} created`,
   });
 });
 
